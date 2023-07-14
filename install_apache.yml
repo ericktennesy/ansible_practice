@@ -2,18 +2,36 @@
 
 - hosts: all
   become: true
+  pre_tasks:
+
+  - name: install updates
+    tags: update
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: web_server
+  become: true
+  tasks: 
+
+   - name: install apache and php
+     tags: apache2, php
+     package:
+       name:
+         - apache2
+         - libapache2-mod-php
+       state: latest
+     when: ansible_distribution == "Ubuntu"
+
+- hosts: file_server
+  become: true
   tasks:
 
-  - name: update repository index
+  - name: install mariadb and samba
+    tags: mariadb, samba
     apt:
-      update_cache: yes
-
-  - name: install apache2 package
-    apt:
-      name: apache2
-      state: latest
-
-  - name: add php support
-    apt:
-      name: libapache2-mod-php
+      name: 
+        - mariadb-server
+        - samba
       state: latest
