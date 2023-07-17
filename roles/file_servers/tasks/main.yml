@@ -1,0 +1,6 @@
+- name: install mariadb and samba
+  apt:
+    name:
+      - mariadb-server
+      - samba
+    state: latest

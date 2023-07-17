@@ -1,0 +1,73 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update repo cache
+    tags: update
+    apt:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for sinone user
+    tags: update
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ4d8wE934ijMmaUloRAIqDN7Grh1LreERmUyvQDTEa+ ansible"
+
+- hosts: workstations
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+      name: unzip
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.5.3/terraform_1.5.3_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root 
+
+- hosts: web_server
+  become: true
+  tasks: 
+
+   - name: install apache and php
+     tags: apache2, php
+     package:
+       name:
+         - apache2
+         - libapache2-mod-php
+       state: latest
+     when: ansible_distribution == "Ubuntu"
+
+   - name: copy html file to web servers
+     tags: apache, apache2, httpd
+     copy:
+       src: default_site.html
+       dest: /var/www/html/index.html
+       owner: root
+       group: root
+       mode: 0644
+
+- hosts: file_server
+  become: true
+  tasks:
+
+  - name: install mariadb and samba
+    tags: mariadb, samba
+    apt:
+      name: 
+        - mariadb-server
+        - samba
+      state: latest
