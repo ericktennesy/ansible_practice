@@ -4,12 +4,22 @@
   become: true
   pre_tasks:
 
-  - name: install updates
+  - name: update repo cache
     tags: update
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for sinone user
+    tags: update
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ4d8wE934ijMmaUloRAIqDN7Grh1LreERmUyvQDTEa+ ansible"
 
 - hosts: workstations
   become: true
